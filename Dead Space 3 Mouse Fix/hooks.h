@@ -8,7 +8,7 @@
 
 /*TODO:
 * Find all calls to UpdateViewAngles to see where else angles are calculated.
-* Cam movement when climbing ladders.
+* Separate hooks definitions from implementations.
 * */
 
 const uintptr_t GAME_BASE_ADDRESS = (uintptr_t)GetModuleHandle(NULL);
@@ -55,6 +55,7 @@ const ClampValuesToAnalogStick ClampValuesToAnalogStick_Address = (ClampValuesTo
 const uintptr_t ClampValuesToAnalogStick_Return_In_HandleCameraMovementOnGroundNotAiming = (GAME_BASE_ADDRESS + 0x33f407);
 const uintptr_t ClampValuesToAnalogStick_Return_In_ReadMouseValuesOnGroundAiming = (GAME_BASE_ADDRESS + 0x149f2e);
 const uintptr_t ClampValuesToAnalogStick_Return_In_ReadMouseValuesForZeroG = (GAME_BASE_ADDRESS + 0x14f806);
+const uintptr_t ClampValuesToAnalogStick_Return_In_HandleCameraMovementOnLadder = (GAME_BASE_ADDRESS + 0x34e6a5);
 
 typedef float (__thiscall * ObtainValueForOnGroundNotAiming1)(int param_1_00, char param_1);
 ObtainValueForOnGroundNotAiming1 ObtainValueForOnGroundNotAiming1_Original = nullptr;
@@ -126,6 +127,17 @@ const uintptr_t ClampValue_Return_In_HandleCameraMovementInZeroG_For_Y = (GAME_B
 typedef int (__thiscall * FUN_00aa22d0)(void * _this, int param_1);
 FUN_00aa22d0 FUN_00aa22d0_Original = nullptr;
 const FUN_00aa22d0 FUN_00aa22d0_Address = (FUN_00aa22d0)(GAME_BASE_ADDRESS + 0x6a22d0);
+
+typedef void (__thiscall * HandleCameraMovementOnLadder)(void *, float);
+HandleCameraMovementOnLadder HandleCameraMovementOnLadder_Original = nullptr;
+const HandleCameraMovementOnLadder HandleCameraMovementOnLadder_Address = (HandleCameraMovementOnLadder)(GAME_BASE_ADDRESS + 0x34e480);
+const uintptr_t ReadValuesFromMouse_Return_In_HandleCameraMovementOnLadder = (GAME_BASE_ADDRESS + 0x34e68b);
+
+typedef double (__cdecl * ClamperFunction)(float value, float min, float max);
+ClamperFunction ClamperFunction_Original = nullptr;
+const ClamperFunction ClamperFunction_Address = (ClamperFunction)(GAME_BASE_ADDRESS + 0x1040);
+const uintptr_t ClamperFunction_Return_In_HandleCameraMovementOnLadder_For_X = (GAME_BASE_ADDRESS + 0x34e7a1);
+const uintptr_t ClamperFunction_Return_In_HandleCameraMovementOnLadder_For_Y = (GAME_BASE_ADDRESS + 0x34e7f7);
 
 //Returns some value that is used to calculate the horizontal view angle on ground when not aiming,
 //and also in zero gravity.
@@ -261,7 +273,10 @@ struct Hooks
    {
       uintptr_t ret = reinterpret_cast<uintptr_t>(_ReturnAddress());
 
-      if(ret == ReadValuesFromMouse_Return_In_HandleCameraMovementOnGroundNotAiming || ret == ReadValuesFromMouse_Return_In_ReadMouseValuesOnGroundAiming)
+      if(
+         ret == ReadValuesFromMouse_Return_In_HandleCameraMovementOnGroundNotAiming ||
+         ret == ReadValuesFromMouse_Return_In_ReadMouseValuesOnGroundAiming ||
+         ret == ReadValuesFromMouse_Return_In_HandleCameraMovementOnLadder)
       {
          ReadValuesFromMouse_Original(_this, param_1, param_2, x, y, 0, 0, param_7, param_8, param_9);
 
@@ -277,11 +292,12 @@ struct Hooks
    {
       uintptr_t ret = reinterpret_cast<uintptr_t>(_ReturnAddress());
 
-      //Simply don't do anything in here in the cases where this function it is called
+      //Simply don't do anything in here in the cases where this function is called
       //from within specific functions that handle camera movement.
       if(ret == ClampValuesToAnalogStick_Return_In_HandleCameraMovementOnGroundNotAiming ||
          ret == ClampValuesToAnalogStick_Return_In_ReadMouseValuesOnGroundAiming ||
-         ret == ClampValuesToAnalogStick_Return_In_ReadMouseValuesForZeroG)
+         ret == ClampValuesToAnalogStick_Return_In_ReadMouseValuesForZeroG ||
+         ret == ClampValuesToAnalogStick_Return_In_HandleCameraMovementOnLadder)
       {
          return 0;
       }
@@ -352,7 +368,9 @@ struct Hooks
    }*/
 
    //The function that sets the final view angles.
-   //It can be used to easily trace at which points the view angles are updated.
+   //It can be used to easily trace at which points the view angles are updated,
+   //but I realized that not every situation uses it. For instance, it is not
+   //used for camera movement on ladders.
    static void __thiscall UpdateViewAngles_Wrapper(void *_this,float y,float x,float param_3,int param_4)
    {
       uintptr_t ret = reinterpret_cast<uintptr_t>(_ReturnAddress());
@@ -401,6 +419,24 @@ struct Hooks
    {
       return FUN_00aa22d0_Original(_this, param_1);
    }*/
+
+   //This function handles camera movement when climbind ladders.
+   static void __thiscall HandleCameraMovementOnLadder_Wrapper(void * _this, float frameDelta)
+   {
+      //This local_30 is used to alter the values read from the mouse,
+      //so use it to invert its effect.
+      float local_30 = frameDelta * 30.f;
+
+      //0x16c seems to always be 0.061087 (which may represent 3.5 degrees in radians)
+      //0x170 seems to always be 0.061087
+      //Regardless of what they represent, they can be used to undo the impact that
+      //the frameDelta has on the new angles calculated in here, and at the same time
+      //convert the values read from the mouse to radians.
+      *(float *)((int)_this + 0x16c) = DEGREES_TO_RADIANS / local_30;
+      *(float *)((int)_this + 0x170) = DEGREES_TO_RADIANS / local_30;
+
+      HandleCameraMovementOnLadder_Original(_this, frameDelta);
+   }
 };
 
 //This funtion is called in ReadMouseValuesForZeroG after calling ReadValuesFromMouse, and
@@ -461,6 +497,84 @@ double __cdecl ClampValue_Wrapper(float param_1, int *param_2)
    return ClampValue_Original(param_1, param_2);
 }
 
+/*
+This ClamperFunction does this:
+   if value < min
+      return min
+   
+   if value > max
+      return max
+
+   return value
+
+Used for testing only.
+*/
+double __cdecl ClamperFunction_Wrapper(float value, float min, float max)
+{
+   uintptr_t ret = reinterpret_cast<uintptr_t>(_ReturnAddress());
+   double r = ClamperFunction_Original(value, min, max);
+
+   if(
+      //ret == ClamperFunction_Return_In_HandleCameraMovementOnLadder_For_X)
+      ret == ClamperFunction_Return_In_HandleCameraMovementOnLadder_For_Y)
+   {
+      printf("clamper received %f %f %f\n", value, min, max);
+      printf("returning %f\n\n", r);
+   }
+
+   return r;
+}
+
+//Helper function to patch memory with NOP (0x90) instructions.
+bool NopMemory(void * destination, size_t size) 
+{
+    DWORD oldProtect;
+
+    //1. Change memory page permission to Read/Write/Execute.
+    if (!VirtualProtect(destination, size, PAGE_EXECUTE_READWRITE, &oldProtect)) 
+        return false;
+
+    //2. Overwrite the target address with NOPs (0x90).
+    //0x90 is the opcode for "No Operation" in x86/x64.
+    memset(destination, 0x90, size);
+
+    //3. Restore the original memory permissions.
+    DWORD temp;
+
+    if(!VirtualProtect(destination, size, oldProtect, &temp))
+       return false;
+
+    //4. (Crucial for x86/x64) Clear the instruction cache.
+    //The CPU might have already cached the old instructions. This forces a reload.
+    return FlushInstructionCache(GetCurrentProcess(), destination, size) != 0;
+}
+
+//This function patches 2 assembly instructions related to the calculation of the new
+//vertical angle when Isaac is on a ladder, which I could not fix from within
+//HandleCameraMovementOnLadder_Wrapper.
+void PatchCameraMovementOnLadder()
+{
+   //With the changes in HandleCameraMovementOnLadder_Wrapper, the final vertical angle is
+   //correctly calculated in HandleCameraMovementOnLadder using the raw mouse values, but
+   //immediately after that, the 2 instructions located at the following addresses change
+   //it if the difference between the new and old vertical angle is too big.
+   //Replace these instructions with NOPs, so that if it's the case where the difference
+   //between the new and old vertical angle is too big, the new angle remains unaltered.
+   void * targetAddress1 = (void*)(GAME_BASE_ADDRESS + 0x34e83f);
+   void * targetAddress2 = (void*)(GAME_BASE_ADDRESS + 0x34e81f);
+   size_t instructionSize = 6;
+
+   if (NopMemory(targetAddress1, instructionSize)) 
+       printf("PatchCameraMovementOnLadder OK\n");
+   else
+       printf("PatchCameraMovementOnLadder ERROR\n");
+
+   if (NopMemory(targetAddress2, instructionSize)) 
+       printf("PatchCameraMovementOnLadder OK\n");
+   else
+       printf("PatchCameraMovementOnLadder ERROR\n");
+}
+
 void CreateHookAndEnable(LPVOID pTarget, LPVOID pDetour, LPVOID * ppOriginal, const char * functionName)
 {
    printf("Hooking %50s:", functionName);
@@ -519,6 +633,10 @@ void InitializeHooks()
    CreateHookAndEnable(ObtainValueForZeroGHorizontalMovement_Address, ObtainValueForZeroGHorizontalMovement_Wrapper, (void**)&ObtainValueForZeroGHorizontalMovement_Original, "ObtainValueForZeroGHorizontalMovement");
    CreateHookAndEnable(ObtainValueForZeroGVerticalMovement_Address, ObtainValueForZeroGVerticalMovement_Wrapper, (void**)&ObtainValueForZeroGVerticalMovement_Original, "ObtainValueForZeroGVerticalMovement");
    CreateHookAndEnable(ClampValue_Address, ClampValue_Wrapper, (void**)&ClampValue_Original, "ClampValue");
+
+   //Hooks for climbing ladders.
+   CreateHookAndEnable(HandleCameraMovementOnLadder_Address, Hooks::HandleCameraMovementOnLadder_Wrapper, (void**)&HandleCameraMovementOnLadder_Original, "HandleCameraMovementOnLadder");
+   PatchCameraMovementOnLadder();
 
    //Other general hooks.
    CreateHookAndEnable(ReadValuesFromMouse_Address, Hooks::ReadValuesFromMouse_Wrapper, (void**)&ReadValuesFromMouse_Original, "ReadValuesFromMouse");
