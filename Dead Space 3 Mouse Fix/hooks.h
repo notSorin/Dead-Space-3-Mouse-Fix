@@ -622,6 +622,20 @@ void CreateHookAndEnable(LPVOID pTarget, LPVOID pDetour, LPVOID * ppOriginal, co
    printf("\n");
 }
 
+void CreateHookWithoutEnabling(LPVOID pTarget, LPVOID pDetour, LPVOID * ppOriginal, const char * functionName)
+{
+   printf("Hooking %50s:", functionName);
+
+   MH_STATUS status = MH_CreateHook(pTarget, pDetour, ppOriginal);
+
+   if(status == MH_OK)
+      printf(" Creation OK | Not enabling on purpose");
+   else
+      printf(" Creation failed (status %s)", MH_StatusToString(status));
+
+   printf("\n");
+}
+
 void InitializeMinHook()
 {
    MH_STATUS status = MH_Initialize();
