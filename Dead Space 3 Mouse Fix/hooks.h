@@ -139,6 +139,10 @@ const ClamperFunction ClamperFunction_Address = (ClamperFunction)(GAME_BASE_ADDR
 const uintptr_t ClamperFunction_Return_In_HandleCameraMovementOnLadder_For_X = (GAME_BASE_ADDRESS + 0x34e7a1);
 const uintptr_t ClamperFunction_Return_In_HandleCameraMovementOnLadder_For_Y = (GAME_BASE_ADDRESS + 0x34e7f7);
 
+typedef void (__thiscall * HandleCameraMovementInSK1P)(void * _this, float param_1, float param_2, int unused, int param_4);
+HandleCameraMovementInSK1P HandleCameraMovementInSK1P_Original = nullptr;
+const HandleCameraMovementInSK1P HandleCameraMovementInSK1P_Address = (HandleCameraMovementInSK1P)(GAME_BASE_ADDRESS + 0x24fce0);
+
 //Returns some value that is used to calculate the horizontal view angle on ground when not aiming,
 //and also in zero gravity.
 float __fastcall ObtainValueForAiming1_Wrapper(int * param_1)
@@ -437,6 +441,23 @@ struct Hooks
 
       HandleCameraMovementOnLadder_Original(_this, frameDelta);
    }
+
+   //This function handles the camera movement while inside the SK1P shuttle,
+   //but also in the main menu where you can move the camera around by moving
+   //the cursor to the edges of the screen.
+   static void __thiscall HandleCameraMovementInSK1P_Wrapper(void * _this, float frameDelta, float param_2, int unused, int param_4)
+   {
+      //Set these values to 0 to use what was read from the mouse, and avoid unnecessary
+      //modifications to the final view angles.
+      //Leaving these values unchanged is also nice as it applies a slight smoothing
+      //to the movement, that still feels raw at the same time.
+      //*(float *)((int)_this + 0x2c) = 0.f;
+      //*(float *)((int)_this + 0x30) = 0.f;
+
+      //Pass 1/30 as frame delta so an internal variable becomes 1, and avoid unnecessary
+      //modifications to the final view angles.
+      HandleCameraMovementInSK1P_Original(_this, 1.f / 30.f, param_2, unused, param_4);
+   }
 };
 
 //This funtion is called in ReadMouseValuesForZeroG after calling ReadValuesFromMouse, and
@@ -587,15 +608,66 @@ void PatchCameraMovementOnLadder()
    void * targetAddress2 = (void*)(GAME_BASE_ADDRESS + 0x34e81f);
    size_t instructionSize = 6;
 
-   if (NopMemory(targetAddress1, instructionSize)) 
+   if (NopMemory(targetAddress1, instructionSize))
        printf("PatchCameraMovementOnLadder OK\n");
    else
        printf("PatchCameraMovementOnLadder ERROR\n");
 
-   if (NopMemory(targetAddress2, instructionSize)) 
+   if (NopMemory(targetAddress2, instructionSize))
        printf("PatchCameraMovementOnLadder OK\n");
    else
        printf("PatchCameraMovementOnLadder ERROR\n");
+}
+
+//Removes the camera auto centering while inside the SK1P shuttle.
+void PatchSK1PAutoCentering()
+{
+   //The instructions that center the camera start at the following address,
+   //and they take up 22 bytes; replace those with NOP, so the angles remain unchanged.
+   void * targetAddress = (void*)(0x64fe2e);
+   size_t instructionSize = 22;
+
+   if (NopMemory(targetAddress, instructionSize))
+       printf("PatchSK1PAutoCentering OK\n");
+   else
+       printf("PatchSK1PAutoCentering ERROR\n");
+}
+
+//Changes the logic so that even very small mouse movements are taken into
+//consideration while inside the SK1P shuttle.
+void PatchSK1PIgnoreSmallValues()
+{
+   uintptr_t targetAddress = 0x64fde9;
+   //The following payload will change a conditional to "value >= 0", instead of "value >= 0.05".
+   std::vector<unsigned char> payload = { 0xd9, 0xee, 0x90, 0x90, 0x90, 0x90 };
+
+   if (WriteRawBytes(targetAddress, payload))
+      printf("PatchSK1PCameraMovement ignore small values OK\n");
+   else
+      printf("PatchSK1PCameraMovement ignore small values ERROR\n");
+}
+
+//Removes snapping the camera to the center of the view when the distance
+//from the center is <= 0.2 while inside the SK1P shuttle.
+void PatchSK1PCameraSnapping()
+{
+   uintptr_t targetAddress = 0x650013;
+   //The following payload will simply pop a value from the FPU, instead of popping
+   //and storing into a local variable which would alter the final view angles.
+   std::vector<unsigned char> payload = { 0xdd, 0xd8, 0x90 };
+
+   if (WriteRawBytes(targetAddress, payload))
+      printf("PatchSK1PCameraMovement snapping 1 OK\n");
+   else
+      printf("PatchSK1PCameraMovement snapping 1 ERROR\n");
+
+   targetAddress = 0x650042;
+   payload = { 0xdd, 0xd8, 0x90 };
+
+   if (WriteRawBytes(targetAddress, payload))
+      printf("PatchSK1PCameraMovement snapping 2 OK\n");
+   else
+      printf("PatchSK1PCameraMovement snapping 2 ERROR\n");
 }
 
 void CreateHookAndEnable(LPVOID pTarget, LPVOID pDetour, LPVOID * ppOriginal, const char * functionName)
@@ -650,35 +722,41 @@ void InitializeHooks()
 {
    InitializeMinHook();
 
-   //Hooks for on ground, not aiming.
+   //Hooks for on ground, not aiming
    CreateHookAndEnable(HandleCameraMovementOnGroundNotAiming_Address, Hooks::HandleCameraMovementOnGroundNotAiming_Wrapper, (void**)&HandleCameraMovementOnGroundNotAiming_Original, "HandleCameraMovementOnGroundNotAiming");
    CreateHookAndEnable(ObtainValueForOnGroundNotAiming1_Address, Hooks::ObtainValueForOnGroundNotAiming1_Wrapper, (void**)&ObtainValueForOnGroundNotAiming1_Original, "ObtainValueForOnGroundNotAiming1");
    CreateHookAndEnable(ObtainValueForOnGroundNotAiming2_Address, Hooks::ObtainValueForOnGroundNotAiming2_Wrapper, (void**)&ObtainValueForOnGroundNotAiming2_Original, "ObtainValueForOnGroundNotAiming2");
    CreateHookAndEnable(ObtainValueForOnGroundNotAiming3_Address, Hooks::ObtainValueForOnGroundNotAiming3_Wrapper, (void**)&ObtainValueForOnGroundNotAiming3_Original, "ObtainValueForOnGroundNotAiming3");
    CreateHookAndEnable(ObtainValueForOnGroundNotAiming4_Address, Hooks::ObtainValueForOnGroundNotAiming4_Wrapper, (void**)&ObtainValueForOnGroundNotAiming4_Original, "ObtainValueForOnGroundNotAiming4");
 
-   //Hooks for on ground, aiming.
+   //Hooks for on ground, aiming
    CreateHookAndEnable(HandleCameraMovementOnGroundAiming_Address, Hooks::HandleCameraMovementOnGroundAiming_Wrapper, (void**)&HandleCameraMovementOnGroundAiming_Original, "HandleCameraMovementOnGroundAiming");
    CreateHookAndEnable(ReadMouseValuesOnGroundAiming_Address, Hooks::ReadMouseValuesOnGroundAiming_Wrapper, (void**)&ReadMouseValuesOnGroundAiming_Original, "ReadMouseValuesOnGroundAiming");
    CreateHookAndEnable(ObtainValueForReadMouseValuesOnGroundAiming1_Address, ObtainValueForReadMouseValuesOnGroundAiming1_Wrapper, (void**)&ObtainValueForReadMouseValuesOnGroundAiming1_Original, "ObtainValueForReadMouseValuesOnGroundAiming1");
    CreateHookAndEnable(ObtainValueForReadMouseValuesOnGroundAiming2_Address, ObtainValueForReadMouseValuesOnGroundAiming2_Wrapper, (void**)&ObtainValueForReadMouseValuesOnGroundAiming2_Original, "ObtainValueForReadMouseValuesOnGroundAiming2");
    CreateHookAndEnable(ObtainValueForReadMouseValuesOnGroundAiming3_Address, ObtainValueForReadMouseValuesOnGroundAiming3_Wrapper, (void**)&ObtainValueForReadMouseValuesOnGroundAiming3_Original, "ObtainValueForReadMouseValuesOnGroundAiming3");
 
-   //Hooks for zero gravity.
+   //Hooks for zero gravity
    CreateHookAndEnable(HandleCameraMovementInZeroG_Address, Hooks::HandleCameraMovementInZeroG_Wrapper, (void**)&HandleCameraMovementInZeroG_Original, "HandleCameraMovementInZeroG");
    CreateHookAndEnable(ModifyMouseValuesZeroG_Address, ModifyMouseValuesZeroG_Wrapper, (void**)&ModifyMouseValuesZeroG_Original, "ModifyMouseValuesZeroG");
    CreateHookAndEnable(ObtainValueForZeroGHorizontalMovement_Address, ObtainValueForZeroGHorizontalMovement_Wrapper, (void**)&ObtainValueForZeroGHorizontalMovement_Original, "ObtainValueForZeroGHorizontalMovement");
    CreateHookAndEnable(ObtainValueForZeroGVerticalMovement_Address, ObtainValueForZeroGVerticalMovement_Wrapper, (void**)&ObtainValueForZeroGVerticalMovement_Original, "ObtainValueForZeroGVerticalMovement");
    CreateHookAndEnable(ClampValue_Address, ClampValue_Wrapper, (void**)&ClampValue_Original, "ClampValue");
 
-   //Hooks for climbing ladders.
+   //Hooks for climbing ladders
    CreateHookAndEnable(HandleCameraMovementOnLadder_Address, Hooks::HandleCameraMovementOnLadder_Wrapper, (void**)&HandleCameraMovementOnLadder_Original, "HandleCameraMovementOnLadder");
    PatchCameraMovementOnLadder();
 
-   //Other general hooks.
+   //Other general hooks
    CreateHookAndEnable(ReadValuesFromMouse_Address, Hooks::ReadValuesFromMouse_Wrapper, (void**)&ReadValuesFromMouse_Original, "ReadValuesFromMouse");
    CreateHookAndEnable(ClampValuesToAnalogStick_Address, Hooks::ClampValuesToAnalogStick_Wrapper, (void**)&ClampValuesToAnalogStick_Original, "ClampValuesToAnalogStick");
    CreateHookAndEnable(ObtainValueForAiming1_Address, ObtainValueForAiming1_Wrapper, (void**)&ObtainValueForAiming1_Original, "ObtainValueForAiming1");
+
+   //Fixes for SK1P shuttle
+   CreateHookAndEnable(HandleCameraMovementInSK1P_Address, Hooks::HandleCameraMovementInSK1P_Wrapper, (void**)&HandleCameraMovementInSK1P_Original, "HandleCameraMovementInSK1P");
+   PatchSK1PIgnoreSmallValues();
+   PatchSK1PAutoCentering();
+   PatchSK1PCameraSnapping();
 }
 
 void FreeHooks()
