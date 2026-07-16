@@ -18,7 +18,7 @@ void Initialize()
    if(ds3Config::enableDebugConsole)
       InitializeDebugConsole();
 
-   InitializeSystemDinput8DLL();
+   InitializeDInput();
    InitializeHooks();
 }
 
