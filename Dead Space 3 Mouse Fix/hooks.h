@@ -425,7 +425,7 @@ struct Hooks
    {
       //This local_30 is used to alter the values read from the mouse,
       //so use it to invert its effect.
-      float local_30 = frameDelta * 30.f;
+      float local_30 = frameDelta <= 0.f ? 1.f : frameDelta * 30.f;
 
       //0x16c seems to always be 0.061087 (which may represent 3.5 degrees in radians)
       //0x170 seems to always be 0.061087
