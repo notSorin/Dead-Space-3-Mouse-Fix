@@ -74,13 +74,13 @@
     <IncludePath>$(ProjectDir)..\minhook\include;$(IncludePath)</IncludePath>
     <TargetName>dinput8</TargetName>
     <LibraryPath>$(SolutionDir)..\minhook\build\VC17\lib\Release;$(LibraryPath)</LibraryPath>
-    <OutDir>E:\EALibrary\Dead Space 3\</OutDir>
+    <OutDir>$(SolutionDir)$(Configuration)\</OutDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <IncludePath>$(ProjectDir)..\minhook\include;$(IncludePath)</IncludePath>
     <TargetName>dinput8</TargetName>
     <LibraryPath>$(SolutionDir)..\minhook\build\VC17\lib\Release;$(LibraryPath)</LibraryPath>
-    <OutDir>E:\EALibrary\Dead Space 3\</OutDir>
+    <OutDir>$(SolutionDir)$(Configuration)\</OutDir>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <IncludePath>$(ProjectDir)..\minhook\include;$(IncludePath)</IncludePath>
@@ -105,7 +105,8 @@
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <ModuleDefinitionFile>dinput8.def</ModuleDefinitionFile>
-      <AdditionalDependencies>dinput8.lib;dxguid.lib</AdditionalDependencies>
+      <AdditionalDependencies>
+      </AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -123,7 +124,8 @@
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <ModuleDefinitionFile>dinput8.def</ModuleDefinitionFile>
-      <AdditionalDependencies>dinput8.lib;dxguid.lib</AdditionalDependencies>
+      <AdditionalDependencies>
+      </AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -163,13 +165,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <Text Include="backup 14 july.txt" />
-    <Text Include="first working.txt" />
-    <Text Include="notes.cpp" />
-    <Text Include="old 0073f310.txt" />
-    <Text Include="zero g fixed!!!.txt" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="config.h" />
