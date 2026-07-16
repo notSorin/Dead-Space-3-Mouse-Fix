@@ -424,7 +424,7 @@ struct Hooks
       return FUN_00aa22d0_Original(_this, param_1);
    }*/
 
-   //This function handles camera movement when climbind ladders.
+   //This function handles camera movement when climbing ladders.
    static void __thiscall HandleCameraMovementOnLadder_Wrapper(void * _this, float frameDelta)
    {
       //This local_30 is used to alter the values read from the mouse,
