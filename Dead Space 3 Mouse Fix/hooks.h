@@ -549,6 +549,29 @@ bool NopMemory(void * destination, size_t size)
     return FlushInstructionCache(GetCurrentProcess(), destination, size) != 0;
 }
 
+//Helper function to write raw machine code bytes to an address
+bool WriteRawBytes(uintptr_t targetAddress, const std::vector<unsigned char>& bytes)
+{
+    size_t size = bytes.size();
+    DWORD oldProtect;
+
+    //1. Change the memory page permissions to Read/Write/Execute
+    if (!VirtualProtect(reinterpret_cast<LPVOID>(targetAddress), size, PAGE_EXECUTE_READWRITE, &oldProtect))
+        return false;
+
+    //2. Copy the bytes directly into the target memory location
+    memcpy(reinterpret_cast<void*>(targetAddress), bytes.data(), size);
+
+    //3. Restore the original page permissions
+    DWORD temp;
+
+    if(!VirtualProtect(reinterpret_cast<LPVOID>(targetAddress), size, oldProtect, &temp))
+       return false;
+
+    //4. Force the CPU to clear its cache of the old instructions
+    return FlushInstructionCache(GetCurrentProcess(), reinterpret_cast<LPCVOID>(targetAddress), size);
+}
+
 //This function patches 2 assembly instructions related to the calculation of the new
 //vertical angle when Isaac is on a ladder, which I could not fix from within
 //HandleCameraMovementOnLadder_Wrapper.
