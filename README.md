@@ -17,7 +17,7 @@
 ❓There may be some other relevant cases that require raw mouse input, which I have not yet discovered. The patch will be updated if more relevant cases are found.
 
 # For Players
-To use the patch, copy the "dinput8.dll" (see Releases) into the folder where the "deadspace3.exe" is located (e.g., E:\EALibrary\Dead Space 3). The game will automatically use the DLL.
+To use the patch, copy the "dinput8.dll" (see Releases) into the folder where the "deadspace3.exe" is located (e.g., E:\EALibrary\Dead Space 3). The game will automatically use the DLL when launched.
 
 To remove the patch, simply move, rename, or delete the "dinput8.dll".
 
