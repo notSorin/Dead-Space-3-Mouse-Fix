@@ -9,6 +9,8 @@
 
 ✅Uses raw mouse input when manning the cannon in chapter 6.
 
+✅Uses raw mouse input for the reticle movement while piloting the ship in chapter 7.
+
 ✅While inside the SK1P fast travel shuttle: It makes the camera movement more responsive; removes the automatic camera centering; very small mouse movements are not ignored.
 
 # What the Patch Doesn’t Do

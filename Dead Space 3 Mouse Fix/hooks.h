@@ -57,6 +57,7 @@ const uintptr_t ClampValuesToAnalogStick_Return_In_ReadMouseValuesOnGroundAiming
 const uintptr_t ClampValuesToAnalogStick_Return_In_ReadMouseValuesForZeroG = (GAME_BASE_ADDRESS + 0x14f806);
 const uintptr_t ClampValuesToAnalogStick_Return_In_HandleCameraMovementOnLadder = (GAME_BASE_ADDRESS + 0x34e6a5);
 const uintptr_t ClampValuesToAnalogStick_Return_In_HandleCameraMovementOnCannon = 0x67a4ba;
+const uintptr_t ClampValuesToAnalogStick_Return_In_ReadMouseValuesForPilotingShip = 0x67932c;
 
 typedef float (__thiscall * ObtainValueForOnGroundNotAiming1)(int param_1_00, char param_1);
 ObtainValueForOnGroundNotAiming1 ObtainValueForOnGroundNotAiming1_Original = nullptr;
@@ -124,6 +125,8 @@ ClampValue ClampValue_Original = nullptr;
 const ClampValue ClampValue_Address = (ClampValue)(GAME_BASE_ADDRESS + 0x15fa80);
 const uintptr_t ClampValue_Return_In_HandleCameraMovementInZeroG_For_X = (GAME_BASE_ADDRESS + 0x14fa55);
 const uintptr_t ClampValue_Return_In_HandleCameraMovementInZeroG_For_Y = (GAME_BASE_ADDRESS + 0x14fa6c);
+const uintptr_t ClampValue_Return_In_HandleReticleMovementWhenPilotingShip_For_X = 0x67962f;
+const uintptr_t ClampValue_Return_In_HandleReticleMovementWhenPilotingShip_For_Y = 0x67965b;
 
 typedef int (__thiscall * FUN_00aa22d0)(void * _this, int param_1);
 FUN_00aa22d0 FUN_00aa22d0_Original = nullptr;
@@ -134,6 +137,8 @@ HandleCameraMovementOnLadder HandleCameraMovementOnLadder_Original = nullptr;
 const HandleCameraMovementOnLadder HandleCameraMovementOnLadder_Address = (HandleCameraMovementOnLadder)(GAME_BASE_ADDRESS + 0x34e480);
 const uintptr_t ReadValuesFromMouse_Return_In_HandleCameraMovementOnLadder = (GAME_BASE_ADDRESS + 0x34e68b);
 const uintptr_t ReadValuesFromMouse_Return_In_HandleCameraMovementOnCannon = 0x67a4f9;
+//const uintptr_t ReadValuesFromMouse_Return_In_ReadMouseValuesForPilotingShip_Ship_Movement = 0x67929b;
+const uintptr_t ReadValuesFromMouse_Return_In_ReadMouseValuesForPilotingShip_Reticle_Movement = 0x679318;
 
 typedef double (__cdecl * ClamperFunction)(float value, float min, float max);
 ClamperFunction ClamperFunction_Original = nullptr;
@@ -152,6 +157,10 @@ const ReadMouseValuesForHandleCameraMovementOnCannon ReadMouseValuesForHandleCam
 typedef void (__thiscall * HandleCameraMovementOnCannon)(void * _this, float frameDelta);
 HandleCameraMovementOnCannon HandleCameraMovementOnCannon_Original = nullptr;
 const HandleCameraMovementOnCannon HandleCameraMovementOnCannon_Address = (HandleCameraMovementOnCannon)0x6a57b0;
+
+//typedef void (__thiscall * ReadMouseValuesForPilotingShip)(void * _this, int param_1, float param_2, unsigned int param_3, int * param_4, int param_5);
+//ReadMouseValuesForPilotingShip ReadMouseValuesForPilotingShip_Original = nullptr;
+//const ReadMouseValuesForPilotingShip ReadMouseValuesForPilotingShip_Address = (ReadMouseValuesForPilotingShip)0x679250;
 
 //Returns some value that is used to calculate the horizontal view angle on ground when not aiming,
 //and also in zero gravity.
@@ -297,6 +306,20 @@ struct Hooks
          return;
       }
 
+      if(ret == ReadValuesFromMouse_Return_In_ReadMouseValuesForPilotingShip_Reticle_Movement)
+      {
+         ReadValuesFromMouse_Original(_this, param_1, param_2, x, y, 0, 0, param_7, param_8, param_9);
+
+         //The raw mouse values are a bit too small to be used for the ship's reticle movement.
+         //This is probably because the values from the mouse are used as pixel units, not to be
+         //transformed into radians.
+         //Scale them up for more responsive movement.
+         *x = *x * 2.5f;
+         *y = *y * 2.5f;
+
+         return;
+      }
+
       ReadValuesFromMouse_Original(_this, param_1, param_2, x, y, param_5, param_6, param_7, param_8, param_9);
    }
 
@@ -312,7 +335,8 @@ struct Hooks
          ret == ClampValuesToAnalogStick_Return_In_ReadMouseValuesOnGroundAiming ||
          ret == ClampValuesToAnalogStick_Return_In_ReadMouseValuesForZeroG ||
          ret == ClampValuesToAnalogStick_Return_In_HandleCameraMovementOnLadder ||
-         ret == ClampValuesToAnalogStick_Return_In_HandleCameraMovementOnCannon)
+         ret == ClampValuesToAnalogStick_Return_In_HandleCameraMovementOnCannon ||
+         ret == ClampValuesToAnalogStick_Return_In_ReadMouseValuesForPilotingShip)
       {
          return 0;
       }
@@ -501,6 +525,13 @@ struct Hooks
 
       HandleCameraMovementOnCannon_Original(_this, frameDelta);
    }
+
+   //Reads values from the mouse to be used while piloting the ship in chapter 7.
+   //It is not required to change its behavior.
+   /*static void __thiscall ReadMouseValuesForPilotingShip_Wrapper(void * _this, int param_1, float param_2, unsigned int param_3, int * param_4, int param_5)
+   {
+       ReadMouseValuesForPilotingShip_Original(_this, param_1, param_2, param_3, param_4, param_5);
+   }*/
 };
 
 //This funtion is called in ReadMouseValuesForZeroG after calling ReadValuesFromMouse, and
@@ -548,11 +579,15 @@ double __fastcall ObtainValueForZeroGVerticalMovement_Wrapper(int param_1)
 
 //This function is called from within HandleCameraMovementInZeroG to clamp param_1 is in range [-1, 1].
 //param_1 takes the values of what was read from the mouse in ReadMouseValuesForZeroG.
-double __cdecl ClampValue_Wrapper(float param_1, int *param_2)
+//It is also called when piloting the ship in chapter 7 to clamp what was read from the mouse.
+double __cdecl ClampValue_Wrapper(float param_1, int * param_2)
 {
    uintptr_t ret = reinterpret_cast<uintptr_t>(_ReturnAddress());
 
-   if(ret == ClampValue_Return_In_HandleCameraMovementInZeroG_For_X || ret == ClampValue_Return_In_HandleCameraMovementInZeroG_For_Y)
+   if(ret == ClampValue_Return_In_HandleCameraMovementInZeroG_For_X ||
+      ret == ClampValue_Return_In_HandleCameraMovementInZeroG_For_Y ||
+      ret == ClampValue_Return_In_HandleReticleMovementWhenPilotingShip_For_X ||
+      ret == ClampValue_Return_In_HandleReticleMovementWhenPilotingShip_For_Y)
    {
       //Return the same value that was read from the mouse in order to avoid clamping.
       return param_1;
