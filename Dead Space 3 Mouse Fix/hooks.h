@@ -56,6 +56,7 @@ const uintptr_t ClampValuesToAnalogStick_Return_In_HandleCameraMovementOnGroundN
 const uintptr_t ClampValuesToAnalogStick_Return_In_ReadMouseValuesOnGroundAiming = (GAME_BASE_ADDRESS + 0x149f2e);
 const uintptr_t ClampValuesToAnalogStick_Return_In_ReadMouseValuesForZeroG = (GAME_BASE_ADDRESS + 0x14f806);
 const uintptr_t ClampValuesToAnalogStick_Return_In_HandleCameraMovementOnLadder = (GAME_BASE_ADDRESS + 0x34e6a5);
+const uintptr_t ClampValuesToAnalogStick_Return_In_HandleCameraMovementOnCannon = 0x67a4ba;
 
 typedef float (__thiscall * ObtainValueForOnGroundNotAiming1)(int param_1_00, char param_1);
 ObtainValueForOnGroundNotAiming1 ObtainValueForOnGroundNotAiming1_Original = nullptr;
@@ -132,6 +133,7 @@ typedef void (__thiscall * HandleCameraMovementOnLadder)(void *, float);
 HandleCameraMovementOnLadder HandleCameraMovementOnLadder_Original = nullptr;
 const HandleCameraMovementOnLadder HandleCameraMovementOnLadder_Address = (HandleCameraMovementOnLadder)(GAME_BASE_ADDRESS + 0x34e480);
 const uintptr_t ReadValuesFromMouse_Return_In_HandleCameraMovementOnLadder = (GAME_BASE_ADDRESS + 0x34e68b);
+const uintptr_t ReadValuesFromMouse_Return_In_HandleCameraMovementOnCannon = 0x67a4f9;
 
 typedef double (__cdecl * ClamperFunction)(float value, float min, float max);
 ClamperFunction ClamperFunction_Original = nullptr;
@@ -142,6 +144,14 @@ const uintptr_t ClamperFunction_Return_In_HandleCameraMovementOnLadder_For_Y = (
 typedef void (__thiscall * HandleCameraMovementInSK1P)(void * _this, float param_1, float param_2, int unused, int param_4);
 HandleCameraMovementInSK1P HandleCameraMovementInSK1P_Original = nullptr;
 const HandleCameraMovementInSK1P HandleCameraMovementInSK1P_Address = (HandleCameraMovementInSK1P)(GAME_BASE_ADDRESS + 0x24fce0);
+
+typedef void (__thiscall * ReadMouseValuesForHandleCameraMovementOnCannon)(void * _this, float frameDelta);
+ReadMouseValuesForHandleCameraMovementOnCannon ReadMouseValuesForHandleCameraMovementOnCannon_Original = nullptr;
+const ReadMouseValuesForHandleCameraMovementOnCannon ReadMouseValuesForHandleCameraMovementOnCannon_Address = (ReadMouseValuesForHandleCameraMovementOnCannon)0x67a420;
+
+typedef void (__thiscall * HandleCameraMovementOnCannon)(void * _this, float frameDelta);
+HandleCameraMovementOnCannon HandleCameraMovementOnCannon_Original = nullptr;
+const HandleCameraMovementOnCannon HandleCameraMovementOnCannon_Address = (HandleCameraMovementOnCannon)0x6a57b0;
 
 //Returns some value that is used to calculate the horizontal view angle on ground when not aiming,
 //and also in zero gravity.
@@ -301,7 +311,8 @@ struct Hooks
       if(ret == ClampValuesToAnalogStick_Return_In_HandleCameraMovementOnGroundNotAiming ||
          ret == ClampValuesToAnalogStick_Return_In_ReadMouseValuesOnGroundAiming ||
          ret == ClampValuesToAnalogStick_Return_In_ReadMouseValuesForZeroG ||
-         ret == ClampValuesToAnalogStick_Return_In_HandleCameraMovementOnLadder)
+         ret == ClampValuesToAnalogStick_Return_In_HandleCameraMovementOnLadder ||
+         ret == ClampValuesToAnalogStick_Return_In_HandleCameraMovementOnCannon)
       {
          return 0;
       }
@@ -457,6 +468,38 @@ struct Hooks
       //Pass 1/30 as frame delta so an internal variable becomes 1, and avoid unnecessary
       //modifications to the final view angles.
       HandleCameraMovementInSK1P_Original(_this, 1.f / 30.f, param_2, unused, param_4);
+   }
+
+   //Reads values from the mouse while using the cannon in chapter 6.
+   static void __thiscall ReadMouseValuesForHandleCameraMovementOnCannon_Wrapper(void * _this, float frameDelta)
+   {
+      //The fix here involves passing 0 as the frame delta when calling
+      //ReadMouseValuesForHandleCameraMovementOnCannon_Original, so that
+      //the frame rate has no impact on the mouse values.
+      //But a side effect of this is that when mouse movement stops, the mouse
+      //values from the previous frame will be used in the current frame,
+      //which causes continuous camera movement when no movement is read from the mouse.
+      //To fix this, set the mouse values to 0 before reading from it.
+      *(float *)((int)_this + 0x130) = 0.f;
+      *(float *)((int)_this + 0x134) = 0.f;
+
+      ReadMouseValuesForHandleCameraMovementOnCannon_Original(_this, 0.f);
+   }
+
+   //Handles camera movement while using the cannon in chapter 6.
+   static void __thiscall HandleCameraMovementOnCannon_Wrapper(void * _this, float frameDelta)
+   {
+      //The calculation of the new view angles is dependent on the frame rate
+      //and a maximum of 120 degrees of movement per second. Apply the
+      //inverse of this, so the final view angles are calculated using only the
+      //values read from the mouse.
+      float inverse = 1.f / (frameDelta * 120.f);
+
+      //Place the inverse at these 2 addresses which are used to calculate the final view angles.
+      *(float *)(*(int *)((*(int *)((int)_this + 0x78) - 0x10) + 0xc) + 0x184) = inverse;
+      *(float *)(*(int *)((*(int *)((int)_this + 0x78) - 0x10) + 0xc) + 0x180) = inverse;
+
+      HandleCameraMovementOnCannon_Original(_this, frameDelta);
    }
 };
 
@@ -757,6 +800,10 @@ void InitializeHooks()
    PatchSK1PIgnoreSmallValues();
    PatchSK1PAutoCentering();
    PatchSK1PCameraSnapping();
+
+   //Hooks for the cannon in chapter 6
+   CreateHookAndEnable(ReadMouseValuesForHandleCameraMovementOnCannon_Address, Hooks::ReadMouseValuesForHandleCameraMovementOnCannon_Wrapper, (void**)&ReadMouseValuesForHandleCameraMovementOnCannon_Original, "ReadMouseValuesForHandleCameraMovementOnCannon");
+   CreateHookAndEnable(HandleCameraMovementOnCannon_Address, Hooks::HandleCameraMovementOnCannon_Wrapper, (void**)&HandleCameraMovementOnCannon_Original, "HandleCameraMovementOnCannon");
 }
 
 void FreeHooks()
