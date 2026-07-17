@@ -19,7 +19,7 @@
 # For Players
 To use the patch, copy the "dinput8.dll" (see Releases) into the folder where the "deadspace3.exe" is located (e.g., E:\EALibrary\Dead Space 3). The game will automatically use the DLL.
 
-To remove the patch, simply remove, rename, or delete the "dinput8.dll".
+To remove the patch, simply move, rename, or delete the "dinput8.dll".
 
 # For Developers
 This is a Visual Studio DLL project; it should be possible to simply open and compile it.
