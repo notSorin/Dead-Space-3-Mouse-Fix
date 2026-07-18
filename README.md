@@ -21,10 +21,12 @@
 ❓There may be some other relevant cases that require raw mouse input, which I have not yet discovered. The patch will be updated if more relevant cases are found.
 
 # For Players
-To use the patch, copy the "dinput8.dll" (see Releases) into the folder where the "deadspace3.exe" is located (e.g., E:\EALibrary\Dead Space 3). The game will automatically use the DLL when launched.
+To use the patch, copy the "dinput8.dll" into the folder where the "deadspace3.exe" is located (e.g., E:\EALibrary\Dead Space 3). The game will automatically use the DLL when launched.
+
+The "dinput8.dll" can be found under Releases, and the latest one is recommended as it contains the most fixes.
 
 To remove the patch, simply move, rename, or delete the "dinput8.dll".
 
 # For Developers
-This is a Visual Studio DLL project; it should be possible to simply open and compile it.
+This is a Visual Studio DLL project; it should be possible to simply open and build it.
 It may require to initialize the minhook submodule first, using "git submodule update --init".
