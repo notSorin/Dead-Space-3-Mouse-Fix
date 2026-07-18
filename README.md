@@ -9,7 +9,7 @@
 
 ✅Uses raw mouse input for the reticle movement while piloting the ship in chapter 7.
 
-✅The is a specific type of camera that is used in certain situations such as when sitting inside the SK1P fast travel shuttle, or when fixing the ship that is piloted in chapter 7. This type of camera now uses raw mouse input, its automatic centering has been removed, and very small mouse movements are not ignored.
+✅There is a specific type of camera that is used in certain situations such as when sitting inside the SK1P fast travel shuttle, or when fixing the ship that is piloted in chapter 7. This type of camera now uses raw mouse input, its automatic centering has been removed, and very small mouse movements are not ignored.
 
 ✅Camera movement when climbing ladders has been improved, although it does not feel entirely right. I may tweak it further.
 
