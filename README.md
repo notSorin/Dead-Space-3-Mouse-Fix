@@ -5,13 +5,13 @@
 
 ✅Uses raw mouse input in zero gravity, when aiming / not aiming.
 
-✅Uses raw mouse input when climbing ladders.
-
 ✅Uses raw mouse input when manning the cannon in chapter 6.
 
 ✅Uses raw mouse input for the reticle movement while piloting the ship in chapter 7.
 
 ✅The is a specific type of camera that is used in certain situations such as when sitting inside the SK1P fast travel shuttle, or when fixing the ship that is piloted in chapter 7. This type of camera now uses raw mouse input, its automatic centering has been removed, and very small mouse movements are not ignored.
+
+✅Camera movement when climbing ladders has been improved, although it does not feel entirely right. I may tweak it further.
 
 # What the Patch Doesn’t Do
 ❌At the start of the game, there is a section where Tim is sliding on snow, and has to shoot a jet engine that is on fire. This section does not use raw mouse input. This section only lasts for a couple of seconds, so I may not fix it, but I would like to.
