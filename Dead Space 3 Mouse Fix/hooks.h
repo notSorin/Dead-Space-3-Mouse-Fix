@@ -17,9 +17,9 @@ typedef void (__thiscall * HandleCameraMovementOnGroundNotAiming)(void * _this, 
 HandleCameraMovementOnGroundNotAiming HandleCameraMovementOnGroundNotAiming_Original = nullptr;
 const HandleCameraMovementOnGroundNotAiming HandleCameraMovementOnGroundNotAiming_Address = (HandleCameraMovementOnGroundNotAiming)(GAME_BASE_ADDRESS + 0x33f310);
 
-typedef void (__thiscall * HandleCameraMovementOnGroundAiming)(void * _this, int param_1, float frameDelta);
-HandleCameraMovementOnGroundAiming HandleCameraMovementOnGroundAiming_Original = nullptr;
-const HandleCameraMovementOnGroundAiming HandleCameraMovementOnGroundAiming_Address = (HandleCameraMovementOnGroundAiming)(GAME_BASE_ADDRESS + 0x152030);
+//typedef void (__thiscall * HandleCameraMovementOnGroundAiming)(void * _this, int param_1, float frameDelta);
+//HandleCameraMovementOnGroundAiming HandleCameraMovementOnGroundAiming_Original = nullptr;
+//const HandleCameraMovementOnGroundAiming HandleCameraMovementOnGroundAiming_Address = (HandleCameraMovementOnGroundAiming)(GAME_BASE_ADDRESS + 0x152030);
 
 typedef void (__thiscall * ReadMouseValuesOnGroundAiming)(int * _this, float param_1, float * param_2, float * param_3);
 ReadMouseValuesOnGroundAiming ReadMouseValuesOnGroundAiming_Original = nullptr;
@@ -259,11 +259,12 @@ struct Hooks
       return;
    }
 
-   //This function handles the camera movement on ground when aiming
-   static void __thiscall HandleCameraMovementOnGroundAiming_Wrapper(void * _this, int param_1, float frameDelta)
+   //This function handles the camera movement on ground when aiming.
+   //It is not required to alter its logic.
+   /*static void __thiscall HandleCameraMovementOnGroundAiming_Wrapper(void * _this, int param_1, float frameDelta)
    {
       HandleCameraMovementOnGroundAiming_Original(_this, param_1, frameDelta);
-   }
+   }*/
 
    //This function reads mouse values on ground when aiming.
    static void __thiscall ReadMouseValuesOnGroundAiming_Wrapper(int * _this, float frameDelta, float * outX, float * outY)
@@ -835,7 +836,6 @@ void InitializeHooks()
    CreateHookAndEnable(ObtainValueForOnGroundNotAiming4_Address, Hooks::ObtainValueForOnGroundNotAiming4_Wrapper, (void**)&ObtainValueForOnGroundNotAiming4_Original, "ObtainValueForOnGroundNotAiming4");
 
    //Hooks for on ground, aiming
-   CreateHookAndEnable(HandleCameraMovementOnGroundAiming_Address, Hooks::HandleCameraMovementOnGroundAiming_Wrapper, (void**)&HandleCameraMovementOnGroundAiming_Original, "HandleCameraMovementOnGroundAiming");
    CreateHookAndEnable(ReadMouseValuesOnGroundAiming_Address, Hooks::ReadMouseValuesOnGroundAiming_Wrapper, (void**)&ReadMouseValuesOnGroundAiming_Original, "ReadMouseValuesOnGroundAiming");
    CreateHookAndEnable(ObtainValueForReadMouseValuesOnGroundAiming1_Address, ObtainValueForReadMouseValuesOnGroundAiming1_Wrapper, (void**)&ObtainValueForReadMouseValuesOnGroundAiming1_Original, "ObtainValueForReadMouseValuesOnGroundAiming1");
    CreateHookAndEnable(ObtainValueForReadMouseValuesOnGroundAiming2_Address, ObtainValueForReadMouseValuesOnGroundAiming2_Wrapper, (void**)&ObtainValueForReadMouseValuesOnGroundAiming2_Original, "ObtainValueForReadMouseValuesOnGroundAiming2");
