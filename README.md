@@ -11,7 +11,7 @@
 
 ✅Uses raw mouse input for the reticle movement while piloting the ship in chapter 7.
 
-✅While inside the SK1P fast travel shuttle: It makes the camera movement more responsive; removes the automatic camera centering; very small mouse movements are not ignored.
+✅The is a specific type of camera that is used in certain situations such as when sitting inside the SK1P fast travel shuttle, or when fixing the ship that is piloted in chapter 7. This type of camera now uses raw mouse input, its automatic centering has been removed, and very small mouse movements are not ignored.
 
 # What the Patch Doesn’t Do
 ❌At the start of the game, there is a section where Tim is sliding on snow, and has to shoot a jet engine that is on fire. This section does not use raw mouse input. This section only lasts for a couple of seconds, so I may not fix it, but I would like to.

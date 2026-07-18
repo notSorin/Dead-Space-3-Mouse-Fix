@@ -6,11 +6,6 @@
 #include <MinHook.h>
 #include "config.h"
 
-/*TODO:
-* Find all calls to UpdateViewAngles to see where else angles are calculated.
-* Separate hooks definitions from implementations.
-* */
-
 const uintptr_t GAME_BASE_ADDRESS = (uintptr_t)GetModuleHandle(NULL);
 
 constexpr float DEGREES_TO_RADIANS = 0.01745329f;
@@ -139,6 +134,7 @@ const uintptr_t ReadValuesFromMouse_Return_In_HandleCameraMovementOnLadder = (GA
 const uintptr_t ReadValuesFromMouse_Return_In_HandleCameraMovementOnCannon = 0x67a4f9;
 //const uintptr_t ReadValuesFromMouse_Return_In_ReadMouseValuesForPilotingShip_Ship_Movement = 0x67929b;
 const uintptr_t ReadValuesFromMouse_Return_In_ReadMouseValuesForPilotingShip_Reticle_Movement = 0x679318;
+const uintptr_t ReadValuesFromMouse_Return_In_HandleCameraMovementInSK1P = 0x64fd91;
 
 typedef double (__cdecl * ClamperFunction)(float value, float min, float max);
 ClamperFunction ClamperFunction_Original = nullptr;
@@ -320,6 +316,37 @@ struct Hooks
          return;
       }
 
+      if(ret == ReadValuesFromMouse_Return_In_HandleCameraMovementInSK1P)
+      {
+         //Internally, it is already called with 0,0, but make sure of it regardless.
+         ReadValuesFromMouse_Original(_this, param_1, param_2, x, y, 0, 0, param_7, param_8, param_9);
+
+         /*
+         The logic when moving the camera inside the SK1P shuttle (and also in other
+         situations such as when fixing the ship when piloting it in chapter 7), is as follows:
+         1. Read values from the mouse.
+         2. Add the values read from the mouse to an internal 2D vector (which is
+            subsequently used to determine how far away from the center of the view
+            the camera will go.) (The vector is located at [this + 0x3c] and [this + 0x40].)
+         3. If necessary, scale the vector to length 1.0 if its length is greater than 1.0.
+         4. Multiply the vector by some view angle bounds, in order to calculate the new view's angles.
+            The view's angle bounds depend on the scene for which this method is used, and are
+            located at [this + 0x10], [this + 0x14], [this + 0x18], [this + 0x1c].
+
+         Because the values read from the mouse are added to a 2D vector whose length is supposed
+         to be at most 1.0, the raw values from the mouse will quickly make this vector reach
+         length 1.0 even with small movements, because raw mouse values are commonly greater that 1.0.
+         To avoid this issue, scale the raw mouse values down, significantly.
+         The value of DEGREES_TO_RADIANS can be used for this. It is not a must to use
+         DEGREES_TO_RADIANS; what matters is that they are scaled down significantly to avoid
+         too quick camera movement (which is not required in these situations anyway).
+         */
+         *x = *x * DEGREES_TO_RADIANS;
+         *y = *y * DEGREES_TO_RADIANS;
+
+         return;
+      }
+
       ReadValuesFromMouse_Original(_this, param_1, param_2, x, y, param_5, param_6, param_7, param_8, param_9);
    }
 
@@ -479,19 +506,19 @@ struct Hooks
 
    //This function handles the camera movement while inside the SK1P shuttle,
    //but also in the main menu where you can move the camera around by moving
-   //the cursor to the edges of the screen.
+   //the cursor to the edges of the screen, and in chapter 7 when fixing the ship.
    static void __thiscall HandleCameraMovementInSK1P_Wrapper(void * _this, float frameDelta, float param_2, int unused, int param_4)
    {
-      //Set these values to 0 to use what was read from the mouse, and avoid unnecessary
+      //Set these values to 0 to use only what was read from the mouse, and avoid unnecessary
       //modifications to the final view angles.
-      //Leaving these values unchanged is also nice as it applies a slight smoothing
-      //to the movement, that still feels raw at the same time.
-      //*(float *)((int)_this + 0x2c) = 0.f;
-      //*(float *)((int)_this + 0x30) = 0.f;
+      *(float *)((int)_this + 0x2c) = 0.f;
+      *(float *)((int)_this + 0x30) = 0.f;
 
-      //Pass 1/30 as frame delta so an internal variable becomes 1, and avoid unnecessary
+      //Pass 1/30 as frameDelta so an internal variable becomes 1, and avoid unnecessary
       //modifications to the final view angles.
-      HandleCameraMovementInSK1P_Original(_this, 1.f / 30.f, param_2, unused, param_4);
+      //I believe that param_2 is always 1.0 (which is correct for the view's final angles
+      //calculations), but I am forcing it to 1.0 to make sure.
+      HandleCameraMovementInSK1P_Original(_this, 1.f / 30.f, 1.f, unused, param_4);
    }
 
    //Reads values from the mouse while using the cannon in chapter 6.
