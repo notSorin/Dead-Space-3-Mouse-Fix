@@ -7,159 +7,162 @@
 
 const uintptr_t GAME_BASE_ADDRESS = (uintptr_t)GetModuleHandle(NULL);
 
+#define RELATIVE_ADDRESS(address) (GAME_BASE_ADDRESS + (address))
+
 constexpr float DEGREES_TO_RADIANS = 0.01745329f;
-float const * const _DAT_00ec8b70 = (float *)(GAME_BASE_ADDRESS + 0xac8b70);
-float const * const _DAT_00ec8b74 = (float *)(GAME_BASE_ADDRESS + 0xac8b74);
-float * _DAT_012a9aa8 = (float *)(GAME_BASE_ADDRESS + 0xea9aa8);
-int * DAT_011d3b88 = (int *)(GAME_BASE_ADDRESS + 0xdd3b88);
-BYTE const * const DAT_01229172 = (BYTE *)(GAME_BASE_ADDRESS + 0xe29172);
+float const * const _DAT_00ec8b70 = (float *)RELATIVE_ADDRESS(0xac8b70);
+float const * const _DAT_00ec8b74 = (float *)RELATIVE_ADDRESS(0xac8b74);
+float * _DAT_012a9aa8 = (float *)RELATIVE_ADDRESS(0xea9aa8);
+int * DAT_011d3b88 = (int *)RELATIVE_ADDRESS(0xdd3b88);
+BYTE const * const DAT_01229172 = (BYTE *)RELATIVE_ADDRESS(0xe29172);
+
 
 typedef void (__thiscall * HandleCameraMovementOnGroundNotAiming)(void * _this, float param_1);
 HandleCameraMovementOnGroundNotAiming HandleCameraMovementOnGroundNotAiming_Original = nullptr;
-const HandleCameraMovementOnGroundNotAiming HandleCameraMovementOnGroundNotAiming_Address = (HandleCameraMovementOnGroundNotAiming)(GAME_BASE_ADDRESS + 0x33f310);
+const HandleCameraMovementOnGroundNotAiming HandleCameraMovementOnGroundNotAiming_Address = (HandleCameraMovementOnGroundNotAiming)RELATIVE_ADDRESS(0x33f310);
 
 //typedef void (__thiscall * HandleCameraMovementOnGroundAiming)(void * _this, int param_1, float frameDelta);
 //HandleCameraMovementOnGroundAiming HandleCameraMovementOnGroundAiming_Original = nullptr;
-//const HandleCameraMovementOnGroundAiming HandleCameraMovementOnGroundAiming_Address = (HandleCameraMovementOnGroundAiming)(GAME_BASE_ADDRESS + 0x152030);
+//const HandleCameraMovementOnGroundAiming HandleCameraMovementOnGroundAiming_Address = (HandleCameraMovementOnGroundAiming)RELATIVE_ADDRESS(0x152030);
 
 typedef void (__thiscall * ReadMouseValuesOnGroundAiming)(int * _this, float param_1, float * param_2, float * param_3);
 ReadMouseValuesOnGroundAiming ReadMouseValuesOnGroundAiming_Original = nullptr;
-const ReadMouseValuesOnGroundAiming ReadMouseValuesOnGroundAiming_Address = (ReadMouseValuesOnGroundAiming)(GAME_BASE_ADDRESS + 0x149ea0);
-const uintptr_t ReadMouseValuesOnGroundAiming_Return_In_HandleCameraMovementOnGroundAiming = (GAME_BASE_ADDRESS + 0x1520a8);
+const ReadMouseValuesOnGroundAiming ReadMouseValuesOnGroundAiming_Address = (ReadMouseValuesOnGroundAiming)RELATIVE_ADDRESS(0x149ea0);
+const uintptr_t ReadMouseValuesOnGroundAiming_Return_In_HandleCameraMovementOnGroundAiming = RELATIVE_ADDRESS(0x1520a8);
 
 typedef double (__fastcall * ObtainValueForReadMouseValuesOnGroundAiming1)(float * param_1, int param_2, float frameDelta, float param_4, float mouseValue, float param_6);
 ObtainValueForReadMouseValuesOnGroundAiming1 ObtainValueForReadMouseValuesOnGroundAiming1_Original = nullptr;
-const ObtainValueForReadMouseValuesOnGroundAiming1 ObtainValueForReadMouseValuesOnGroundAiming1_Address = (ObtainValueForReadMouseValuesOnGroundAiming1)(GAME_BASE_ADDRESS + 0x1438a0);
+const ObtainValueForReadMouseValuesOnGroundAiming1 ObtainValueForReadMouseValuesOnGroundAiming1_Address = (ObtainValueForReadMouseValuesOnGroundAiming1)RELATIVE_ADDRESS(0x1438a0);
 
 typedef double (__fastcall * ObtainValueForReadMouseValuesOnGroundAiming2)(int param_1);
 ObtainValueForReadMouseValuesOnGroundAiming2 ObtainValueForReadMouseValuesOnGroundAiming2_Original = nullptr;
-const ObtainValueForReadMouseValuesOnGroundAiming2 ObtainValueForReadMouseValuesOnGroundAiming2_Address = (ObtainValueForReadMouseValuesOnGroundAiming2)(GAME_BASE_ADDRESS + 0x3af60);
+const ObtainValueForReadMouseValuesOnGroundAiming2 ObtainValueForReadMouseValuesOnGroundAiming2_Address = (ObtainValueForReadMouseValuesOnGroundAiming2)RELATIVE_ADDRESS(0x3af60);
 
 typedef double (__fastcall * ObtainValueForReadMouseValuesOnGroundAiming3)(int param_1);
 ObtainValueForReadMouseValuesOnGroundAiming3 ObtainValueForReadMouseValuesOnGroundAiming3_Original = nullptr;
-const ObtainValueForReadMouseValuesOnGroundAiming3 ObtainValueForReadMouseValuesOnGroundAiming3_Address = (ObtainValueForReadMouseValuesOnGroundAiming3)(GAME_BASE_ADDRESS + 0x3af20);
+const ObtainValueForReadMouseValuesOnGroundAiming3 ObtainValueForReadMouseValuesOnGroundAiming3_Address = (ObtainValueForReadMouseValuesOnGroundAiming3)RELATIVE_ADDRESS(0x3af20);
 
 typedef void (__thiscall * ReadValuesFromMouse)(int _this, int param_1, int param_2, float * x, float * y, char param_5, char param_6, float param_7, float param_8, float param_9);
 ReadValuesFromMouse ReadValuesFromMouse_Original = nullptr;
-const ReadValuesFromMouse ReadValuesFromMouse_Address = (ReadValuesFromMouse)(GAME_BASE_ADDRESS + 0x6bc510);
-const uintptr_t ReadValuesFromMouse_Return_In_HandleCameraMovementOnGroundNotAiming = (GAME_BASE_ADDRESS + 0x33f3ed);
-const uintptr_t ReadValuesFromMouse_Return_In_ReadMouseValuesOnGroundAiming = (GAME_BASE_ADDRESS + 0x149f17);
-const uintptr_t ReadValuesFromMouse_Return_In_HandleCameraMovementOnLadder = (GAME_BASE_ADDRESS + 0x34e68b);
-const uintptr_t ReadValuesFromMouse_Return_In_HandleCameraMovementOnCannon = 0x67a4f9;
-//const uintptr_t ReadValuesFromMouse_Return_In_ReadMouseValuesForPilotingShip_Ship_Movement = 0x67929b;
-const uintptr_t ReadValuesFromMouse_Return_In_ReadMouseValuesForPilotingShip_Reticle_Movement = 0x679318;
-const uintptr_t ReadValuesFromMouse_Return_In_HandleCameraMovementInSK1P = 0x64fd91;
-const uintptr_t ReadValuesFromMouse_Return_In_ReadKeyboardAndMouseValues = 0x579614;
+const ReadValuesFromMouse ReadValuesFromMouse_Address = (ReadValuesFromMouse)RELATIVE_ADDRESS(0x6bc510);
+const uintptr_t ReadValuesFromMouse_Return_In_HandleCameraMovementOnGroundNotAiming = RELATIVE_ADDRESS(0x33f3ed);
+const uintptr_t ReadValuesFromMouse_Return_In_ReadMouseValuesOnGroundAiming = RELATIVE_ADDRESS(0x149f17);
+const uintptr_t ReadValuesFromMouse_Return_In_HandleCameraMovementOnLadder = RELATIVE_ADDRESS(0x34e68b);
+const uintptr_t ReadValuesFromMouse_Return_In_HandleCameraMovementOnCannon = RELATIVE_ADDRESS(0x27a4f9);
+//const uintptr_t ReadValuesFromMouse_Return_In_ReadMouseValuesForPilotingShip_Ship_Movement = RELATIVE_ADDRESS(0x27929b);
+const uintptr_t ReadValuesFromMouse_Return_In_ReadMouseValuesForPilotingShip_Reticle_Movement = RELATIVE_ADDRESS(0x279318);
+const uintptr_t ReadValuesFromMouse_Return_In_HandleCameraMovementInSK1P = RELATIVE_ADDRESS(0x24fd91);
+const uintptr_t ReadValuesFromMouse_Return_In_ReadKeyboardAndMouseValues = RELATIVE_ADDRESS(0x179614);
 
 typedef unsigned int (__thiscall * ClampValuesToAnalogStick)(int * param_1_00, float param_1, float * param_2, float * param_3);
 ClampValuesToAnalogStick ClampValuesToAnalogStick_Original = nullptr;
-const ClampValuesToAnalogStick ClampValuesToAnalogStick_Address = (ClampValuesToAnalogStick)(GAME_BASE_ADDRESS + 0xd820);
-const uintptr_t ClampValuesToAnalogStick_Return_In_HandleCameraMovementOnGroundNotAiming = (GAME_BASE_ADDRESS + 0x33f407);
-const uintptr_t ClampValuesToAnalogStick_Return_In_ReadMouseValuesOnGroundAiming = (GAME_BASE_ADDRESS + 0x149f2e);
-const uintptr_t ClampValuesToAnalogStick_Return_In_ReadMouseValuesForZeroG = (GAME_BASE_ADDRESS + 0x14f806);
-const uintptr_t ClampValuesToAnalogStick_Return_In_HandleCameraMovementOnLadder = (GAME_BASE_ADDRESS + 0x34e6a5);
-const uintptr_t ClampValuesToAnalogStick_Return_In_HandleCameraMovementOnCannon = 0x67a4ba;
-const uintptr_t ClampValuesToAnalogStick_Return_In_ReadMouseValuesForPilotingShip = 0x67932c;
-const uintptr_t ClampValuesToAnalogStick_Return_In_HandleCameraMovementForTimSliding = 0x590725;
+const ClampValuesToAnalogStick ClampValuesToAnalogStick_Address = (ClampValuesToAnalogStick)RELATIVE_ADDRESS(0xd820);
+const uintptr_t ClampValuesToAnalogStick_Return_In_HandleCameraMovementOnGroundNotAiming = RELATIVE_ADDRESS(0x33f407);
+const uintptr_t ClampValuesToAnalogStick_Return_In_ReadMouseValuesOnGroundAiming = RELATIVE_ADDRESS(0x149f2e);
+const uintptr_t ClampValuesToAnalogStick_Return_In_ReadMouseValuesForZeroG = RELATIVE_ADDRESS(0x14f806);
+const uintptr_t ClampValuesToAnalogStick_Return_In_HandleCameraMovementOnLadder = RELATIVE_ADDRESS(0x34e6a5);
+const uintptr_t ClampValuesToAnalogStick_Return_In_HandleCameraMovementOnCannon = RELATIVE_ADDRESS(0x27a4ba);
+const uintptr_t ClampValuesToAnalogStick_Return_In_ReadMouseValuesForPilotingShip = RELATIVE_ADDRESS(0x27932c);
+const uintptr_t ClampValuesToAnalogStick_Return_In_HandleCameraMovementForTimSliding = RELATIVE_ADDRESS(0x190725);
 
 typedef float (__thiscall * ObtainValueForOnGroundNotAiming1)(int param_1_00, char param_1);
 ObtainValueForOnGroundNotAiming1 ObtainValueForOnGroundNotAiming1_Original = nullptr;
-const ObtainValueForOnGroundNotAiming1 ObtainValueForOnGroundNotAiming1_Address = (ObtainValueForOnGroundNotAiming1)(GAME_BASE_ADDRESS + 0x2ed00);
-const uintptr_t ObtainValueForOnGroundNotAiming1_Return_In_HandleCameraMovementOnGroundNotAiming = (GAME_BASE_ADDRESS + 0x33f756);
+const ObtainValueForOnGroundNotAiming1 ObtainValueForOnGroundNotAiming1_Address = (ObtainValueForOnGroundNotAiming1)RELATIVE_ADDRESS(0x2ed00);
+const uintptr_t ObtainValueForOnGroundNotAiming1_Return_In_HandleCameraMovementOnGroundNotAiming = RELATIVE_ADDRESS(0x33f756);
 
 typedef float (__thiscall * ObtainValueForOnGroundNotAiming2)(int param_1_00, char param_1);
 ObtainValueForOnGroundNotAiming2 ObtainValueForOnGroundNotAiming2_Original = nullptr;
-const ObtainValueForOnGroundNotAiming2 ObtainValueForOnGroundNotAiming2_Address = (ObtainValueForOnGroundNotAiming2)(GAME_BASE_ADDRESS + 0x2ed80);
-const uintptr_t ObtainValueForOnGroundNotAiming2_Return_In_HandleCameraMovementOnGroundNotAiming = (GAME_BASE_ADDRESS + 0x33f763);
+const ObtainValueForOnGroundNotAiming2 ObtainValueForOnGroundNotAiming2_Address = (ObtainValueForOnGroundNotAiming2)RELATIVE_ADDRESS(0x2ed80);
+const uintptr_t ObtainValueForOnGroundNotAiming2_Return_In_HandleCameraMovementOnGroundNotAiming = RELATIVE_ADDRESS(0x33f763);
 
 typedef float (__thiscall * ObtainValueForOnGroundNotAiming3)(int param_1_00, char param_1);
 ObtainValueForOnGroundNotAiming3 ObtainValueForOnGroundNotAiming3_Original = nullptr;
-const ObtainValueForOnGroundNotAiming3 ObtainValueForOnGroundNotAiming3_Address = (ObtainValueForOnGroundNotAiming3)(GAME_BASE_ADDRESS + 0x2ee00);
-const uintptr_t ObtainValueForOnGroundNotAiming3_Return_In_HandleCameraMovementOnGroundNotAiming = (GAME_BASE_ADDRESS + 0x33f76a);
+const ObtainValueForOnGroundNotAiming3 ObtainValueForOnGroundNotAiming3_Address = (ObtainValueForOnGroundNotAiming3)RELATIVE_ADDRESS(0x2ee00);
+const uintptr_t ObtainValueForOnGroundNotAiming3_Return_In_HandleCameraMovementOnGroundNotAiming = RELATIVE_ADDRESS(0x33f76a);
 
 typedef float (__thiscall * ObtainValueForOnGroundNotAiming4)(int param_1_00, char param_1);
 ObtainValueForOnGroundNotAiming4 ObtainValueForOnGroundNotAiming4_Original = nullptr;
-const ObtainValueForOnGroundNotAiming4 ObtainValueForOnGroundNotAiming4_Address = (ObtainValueForOnGroundNotAiming4)(GAME_BASE_ADDRESS + 0x2ee80);
-const uintptr_t ObtainValueForOnGroundNotAiming4_Return_In_HandleCameraMovementOnGroundNotAiming = (GAME_BASE_ADDRESS + 0x33f779);
+const ObtainValueForOnGroundNotAiming4 ObtainValueForOnGroundNotAiming4_Address = (ObtainValueForOnGroundNotAiming4)RELATIVE_ADDRESS(0x2ee80);
+const uintptr_t ObtainValueForOnGroundNotAiming4_Return_In_HandleCameraMovementOnGroundNotAiming = RELATIVE_ADDRESS(0x33f779);
 
 typedef void (__thiscall * FUN_009e0e60)(void * _this, char * str);
 FUN_009e0e60 FUN_009e0e60Original = nullptr;
-const FUN_009e0e60 FUN_009e0e60Address = (FUN_009e0e60)(GAME_BASE_ADDRESS + 0x5e0e60);
+const FUN_009e0e60 FUN_009e0e60Address = (FUN_009e0e60)RELATIVE_ADDRESS(0x5e0e60);
 
 typedef float (__fastcall * ObtainValueForAiming1)(int * param_1);
 ObtainValueForAiming1 ObtainValueForAiming1_Original = nullptr;
-const ObtainValueForAiming1 ObtainValueForAiming1_Address = (ObtainValueForAiming1)(GAME_BASE_ADDRESS + 0x16d150);
-const uintptr_t ObtainValueForAiming1_Return_In_HandleCameraMovementOnGroundNotAiming = (GAME_BASE_ADDRESS + 0x33f7c9);
-const uintptr_t ObtainValueForAiming1_Return_In_HandleCameraMovementInZeroG = (GAME_BASE_ADDRESS + 0x14fb67);
+const ObtainValueForAiming1 ObtainValueForAiming1_Address = (ObtainValueForAiming1)RELATIVE_ADDRESS(0x16d150);
+const uintptr_t ObtainValueForAiming1_Return_In_HandleCameraMovementOnGroundNotAiming = RELATIVE_ADDRESS(0x33f7c9);
+const uintptr_t ObtainValueForAiming1_Return_In_HandleCameraMovementInZeroG = RELATIVE_ADDRESS(0x14fb67);
 
 typedef void (__fastcall * FUN_005547c0)(int _this);
 FUN_005547c0 FUN_005547c0Original = nullptr;
-const FUN_005547c0 FUN_005547c0Address = (FUN_005547c0)(GAME_BASE_ADDRESS + 0x1547c0);
+const FUN_005547c0 FUN_005547c0Address = (FUN_005547c0)RELATIVE_ADDRESS(0x1547c0);
 
 typedef void (__thiscall * UpdateViewAngles)(void *_this, float y, float x, float param_3, int param_4);
 UpdateViewAngles UpdateViewAngles_Original = nullptr;
-const UpdateViewAngles UpdateViewAngles_Address = (UpdateViewAngles)(GAME_BASE_ADDRESS + 0x321bd0);
+const UpdateViewAngles UpdateViewAngles_Address = (UpdateViewAngles)RELATIVE_ADDRESS(0x321bd0);
 
 typedef void (__thiscall * ReadMouseValuesForZeroG)(void * _this, float param_1);
 ReadMouseValuesForZeroG ReadMouseValuesForZeroG_Original = nullptr;
-const ReadMouseValuesForZeroG ReadMouseValuesForZeroG_Address = (ReadMouseValuesForZeroG)(GAME_BASE_ADDRESS + 0x14f740);
+const ReadMouseValuesForZeroG ReadMouseValuesForZeroG_Address = (ReadMouseValuesForZeroG)RELATIVE_ADDRESS(0x14f740);
 
 typedef void (__thiscall * HandleCameraMovementInZeroG)(void * _this, float frameDelta);
 HandleCameraMovementInZeroG HandleCameraMovementInZeroG_Original = nullptr;
-const HandleCameraMovementInZeroG HandleCameraMovementInZeroG_Address = (HandleCameraMovementInZeroG)(GAME_BASE_ADDRESS + 0x14f910);
+const HandleCameraMovementInZeroG HandleCameraMovementInZeroG_Address = (HandleCameraMovementInZeroG)RELATIVE_ADDRESS(0x14f910);
 
 typedef void (__cdecl * ModifyMouseValuesZeroG)(float * x, float * y, void * param_3);
 ModifyMouseValuesZeroG ModifyMouseValuesZeroG_Original = nullptr;
-const ModifyMouseValuesZeroG ModifyMouseValuesZeroG_Address = (ModifyMouseValuesZeroG)(GAME_BASE_ADDRESS + 0x14a7e0);
-const uintptr_t ModifyMouseValuesZeroG_Return_In_ReadMouseValuesForZeroG = (GAME_BASE_ADDRESS + 0x14f845);
+const ModifyMouseValuesZeroG ModifyMouseValuesZeroG_Address = (ModifyMouseValuesZeroG)RELATIVE_ADDRESS(0x14a7e0);
+const uintptr_t ModifyMouseValuesZeroG_Return_In_ReadMouseValuesForZeroG = RELATIVE_ADDRESS(0x14f845);
 
 typedef double (__fastcall * ObtainValueForZeroGHorizontalMovement)(int param_1);
 ObtainValueForZeroGHorizontalMovement ObtainValueForZeroGHorizontalMovement_Original = nullptr;
-const ObtainValueForZeroGHorizontalMovement ObtainValueForZeroGHorizontalMovement_Address = (ObtainValueForZeroGHorizontalMovement)(GAME_BASE_ADDRESS + 0x2ef60);
-const uintptr_t ObtainValueForZeroGHorizontalMovement_Return_In_HandleCameraMovementInZeroG = (GAME_BASE_ADDRESS + 0x14fb86);
+const ObtainValueForZeroGHorizontalMovement ObtainValueForZeroGHorizontalMovement_Address = (ObtainValueForZeroGHorizontalMovement)RELATIVE_ADDRESS(0x2ef60);
+const uintptr_t ObtainValueForZeroGHorizontalMovement_Return_In_HandleCameraMovementInZeroG = RELATIVE_ADDRESS(0x14fb86);
 
 typedef double (__fastcall * ObtainValueForZeroGVerticalMovement)(int param_1);
 ObtainValueForZeroGVerticalMovement ObtainValueForZeroGVerticalMovement_Original = nullptr;
-const ObtainValueForZeroGVerticalMovement ObtainValueForZeroGVerticalMovement_Address = (ObtainValueForZeroGVerticalMovement)(GAME_BASE_ADDRESS + 0x2ef30);
-const uintptr_t ObtainValueForZeroGVerticalMovement_Return_In_HandleCameraMovementInZeroG = (GAME_BASE_ADDRESS + 0x14fb93);
+const ObtainValueForZeroGVerticalMovement ObtainValueForZeroGVerticalMovement_Address = (ObtainValueForZeroGVerticalMovement)RELATIVE_ADDRESS(0x2ef30);
+const uintptr_t ObtainValueForZeroGVerticalMovement_Return_In_HandleCameraMovementInZeroG = RELATIVE_ADDRESS(0x14fb93);
 
 typedef double (__cdecl * ClampValue)(float param_1, int *param_2);
 ClampValue ClampValue_Original = nullptr;
-const ClampValue ClampValue_Address = (ClampValue)(GAME_BASE_ADDRESS + 0x15fa80);
-const uintptr_t ClampValue_Return_In_HandleCameraMovementInZeroG_For_X = (GAME_BASE_ADDRESS + 0x14fa55);
-const uintptr_t ClampValue_Return_In_HandleCameraMovementInZeroG_For_Y = (GAME_BASE_ADDRESS + 0x14fa6c);
-const uintptr_t ClampValue_Return_In_HandleReticleMovementWhenPilotingShip_For_X = 0x67962f;
-const uintptr_t ClampValue_Return_In_HandleReticleMovementWhenPilotingShip_For_Y = 0x67965b;
+const ClampValue ClampValue_Address = (ClampValue)RELATIVE_ADDRESS(0x15fa80);
+const uintptr_t ClampValue_Return_In_HandleCameraMovementInZeroG_For_X = RELATIVE_ADDRESS(0x14fa55);
+const uintptr_t ClampValue_Return_In_HandleCameraMovementInZeroG_For_Y = RELATIVE_ADDRESS(0x14fa6c);
+const uintptr_t ClampValue_Return_In_HandleReticleMovementWhenPilotingShip_For_X = RELATIVE_ADDRESS(0x27962f);
+const uintptr_t ClampValue_Return_In_HandleReticleMovementWhenPilotingShip_For_Y = RELATIVE_ADDRESS(0x27965b);
 
 typedef int (__thiscall * FUN_00aa22d0)(void * _this, int param_1);
 FUN_00aa22d0 FUN_00aa22d0_Original = nullptr;
-const FUN_00aa22d0 FUN_00aa22d0_Address = (FUN_00aa22d0)(GAME_BASE_ADDRESS + 0x6a22d0);
+const FUN_00aa22d0 FUN_00aa22d0_Address = (FUN_00aa22d0)RELATIVE_ADDRESS(0x6a22d0);
 
 typedef void (__thiscall * HandleCameraMovementOnLadder)(void *, float);
 HandleCameraMovementOnLadder HandleCameraMovementOnLadder_Original = nullptr;
-const HandleCameraMovementOnLadder HandleCameraMovementOnLadder_Address = (HandleCameraMovementOnLadder)(GAME_BASE_ADDRESS + 0x34e480);
+const HandleCameraMovementOnLadder HandleCameraMovementOnLadder_Address = (HandleCameraMovementOnLadder)RELATIVE_ADDRESS(0x34e480);
 
 typedef double (__cdecl * ClamperFunction)(float value, float min, float max);
 ClamperFunction ClamperFunction_Original = nullptr;
-const ClamperFunction ClamperFunction_Address = (ClamperFunction)(GAME_BASE_ADDRESS + 0x1040);
-const uintptr_t ClamperFunction_Return_In_HandleCameraMovementOnLadder_For_X = (GAME_BASE_ADDRESS + 0x34e7a1);
-const uintptr_t ClamperFunction_Return_In_HandleCameraMovementOnLadder_For_Y = (GAME_BASE_ADDRESS + 0x34e7f7);
+const ClamperFunction ClamperFunction_Address = (ClamperFunction)RELATIVE_ADDRESS(0x1040);
+const uintptr_t ClamperFunction_Return_In_HandleCameraMovementOnLadder_For_X = RELATIVE_ADDRESS(0x34e7a1);
+const uintptr_t ClamperFunction_Return_In_HandleCameraMovementOnLadder_For_Y = RELATIVE_ADDRESS(0x34e7f7);
 
 typedef void (__thiscall * HandleCameraMovementInSK1P)(void * _this, float param_1, float param_2, int unused, int param_4);
 HandleCameraMovementInSK1P HandleCameraMovementInSK1P_Original = nullptr;
-const HandleCameraMovementInSK1P HandleCameraMovementInSK1P_Address = (HandleCameraMovementInSK1P)(GAME_BASE_ADDRESS + 0x24fce0);
+const HandleCameraMovementInSK1P HandleCameraMovementInSK1P_Address = (HandleCameraMovementInSK1P)RELATIVE_ADDRESS(0x24fce0);
 
 typedef void (__thiscall * ReadMouseValuesForHandleCameraMovementOnCannon)(void * _this, float frameDelta);
 ReadMouseValuesForHandleCameraMovementOnCannon ReadMouseValuesForHandleCameraMovementOnCannon_Original = nullptr;
-const ReadMouseValuesForHandleCameraMovementOnCannon ReadMouseValuesForHandleCameraMovementOnCannon_Address = (ReadMouseValuesForHandleCameraMovementOnCannon)0x67a420;
+const ReadMouseValuesForHandleCameraMovementOnCannon ReadMouseValuesForHandleCameraMovementOnCannon_Address = (ReadMouseValuesForHandleCameraMovementOnCannon)RELATIVE_ADDRESS(0x27a420);
 
 typedef void (__thiscall * HandleCameraMovementOnCannon)(void * _this, float frameDelta);
 HandleCameraMovementOnCannon HandleCameraMovementOnCannon_Original = nullptr;
-const HandleCameraMovementOnCannon HandleCameraMovementOnCannon_Address = (HandleCameraMovementOnCannon)0x6a57b0;
+const HandleCameraMovementOnCannon HandleCameraMovementOnCannon_Address = (HandleCameraMovementOnCannon)RELATIVE_ADDRESS(0x2a57b0);
 
 typedef void (__fastcall * HandleCameraMovementForTimSliding)(int _this);
 HandleCameraMovementForTimSliding HandleCameraMovementForTimSliding_Original = nullptr;
-const HandleCameraMovementForTimSliding HandleCameraMovementForTimSliding_Address = (HandleCameraMovementForTimSliding)(GAME_BASE_ADDRESS + 0x1906a0);
+const HandleCameraMovementForTimSliding HandleCameraMovementForTimSliding_Address = (HandleCameraMovementForTimSliding)RELATIVE_ADDRESS(0x1906a0);
 
 //Handles camera movement during the section when Tim is sliding on snow
 //at the beginning of the game.
@@ -176,7 +179,7 @@ void __fastcall HandleCameraMovementForTimSliding_Wrapper(int _this)
 
 //typedef void (__thiscall * ReadMouseValuesForPilotingShip)(void * _this, int param_1, float param_2, unsigned int param_3, int * param_4, int param_5);
 //ReadMouseValuesForPilotingShip ReadMouseValuesForPilotingShip_Original = nullptr;
-//const ReadMouseValuesForPilotingShip ReadMouseValuesForPilotingShip_Address = (ReadMouseValuesForPilotingShip)0x679250;
+//const ReadMouseValuesForPilotingShip ReadMouseValuesForPilotingShip_Address = (ReadMouseValuesForPilotingShip)RELATIVE_ADDRESS(0x279250);
 
 //Returns some value that is used to calculate the horizontal view angle on ground when not aiming,
 //and also in zero gravity.
@@ -732,8 +735,8 @@ void PatchCameraMovementOnLadder()
    //it if the difference between the new and old vertical angle is too big.
    //Replace these instructions with NOPs, so that if it's the case where the difference
    //between the new and old vertical angle is too big, the new angle remains unaltered.
-   void * targetAddress1 = (void*)(GAME_BASE_ADDRESS + 0x34e83f);
-   void * targetAddress2 = (void*)(GAME_BASE_ADDRESS + 0x34e81f);
+   void * targetAddress1 = (void*)RELATIVE_ADDRESS(0x34e83f);
+   void * targetAddress2 = (void*)RELATIVE_ADDRESS(0x34e81f);
    size_t instructionSize = 6;
 
    if (NopMemory(targetAddress1, instructionSize))
@@ -752,7 +755,7 @@ void PatchSK1PAutoCentering()
 {
    //The instructions that center the camera start at the following address,
    //and they take up 22 bytes; replace those with NOP, so the angles remain unchanged.
-   void * targetAddress = (void*)(0x64fe2e);
+   void * targetAddress = (void*)RELATIVE_ADDRESS(0x24fe2e);
    size_t instructionSize = 22;
 
    if (NopMemory(targetAddress, instructionSize))
@@ -765,7 +768,7 @@ void PatchSK1PAutoCentering()
 //consideration while inside the SK1P shuttle.
 void PatchSK1PIgnoreSmallValues()
 {
-   uintptr_t targetAddress = 0x64fde9;
+   uintptr_t targetAddress = RELATIVE_ADDRESS(0x24fde9);
    //The following payload will change a conditional to "value >= 0", instead of "value >= 0.05".
    std::vector<unsigned char> payload = { 0xd9, 0xee, 0x90, 0x90, 0x90, 0x90 };
 
@@ -779,7 +782,7 @@ void PatchSK1PIgnoreSmallValues()
 //from the center is <= 0.2 while inside the SK1P shuttle.
 void PatchSK1PCameraSnapping()
 {
-   uintptr_t targetAddress = 0x650013;
+   uintptr_t targetAddress = RELATIVE_ADDRESS(0x250013);
    //The following payload will simply pop a value from the FPU, instead of popping
    //and storing into a local variable which would alter the final view angles.
    std::vector<unsigned char> payload = { 0xdd, 0xd8, 0x90 };
@@ -789,7 +792,7 @@ void PatchSK1PCameraSnapping()
    else
       printf("PatchSK1PCameraMovement snapping 1 ERROR\n");
 
-   targetAddress = 0x650042;
+   targetAddress = RELATIVE_ADDRESS(0x250042);
    payload = { 0xdd, 0xd8, 0x90 };
 
    if (WriteRawBytes(targetAddress, payload))
