@@ -10,6 +10,8 @@ const uintptr_t GAME_BASE_ADDRESS = (uintptr_t)GetModuleHandle(NULL);
 constexpr float DEGREES_TO_RADIANS = 0.01745329f;
 float const * const _DAT_00ec8b70 = (float *)(GAME_BASE_ADDRESS + 0xac8b70);
 float const * const _DAT_00ec8b74 = (float *)(GAME_BASE_ADDRESS + 0xac8b74);
+float * _DAT_012a9aa8 = (float *)(GAME_BASE_ADDRESS + 0xea9aa8);
+int * DAT_011d3b88 = (int *)(GAME_BASE_ADDRESS + 0xdd3b88);
 BYTE const * const DAT_01229172 = (BYTE *)(GAME_BASE_ADDRESS + 0xe29172);
 
 typedef void (__thiscall * HandleCameraMovementOnGroundNotAiming)(void * _this, float param_1);
@@ -42,6 +44,12 @@ ReadValuesFromMouse ReadValuesFromMouse_Original = nullptr;
 const ReadValuesFromMouse ReadValuesFromMouse_Address = (ReadValuesFromMouse)(GAME_BASE_ADDRESS + 0x6bc510);
 const uintptr_t ReadValuesFromMouse_Return_In_HandleCameraMovementOnGroundNotAiming = (GAME_BASE_ADDRESS + 0x33f3ed);
 const uintptr_t ReadValuesFromMouse_Return_In_ReadMouseValuesOnGroundAiming = (GAME_BASE_ADDRESS + 0x149f17);
+const uintptr_t ReadValuesFromMouse_Return_In_HandleCameraMovementOnLadder = (GAME_BASE_ADDRESS + 0x34e68b);
+const uintptr_t ReadValuesFromMouse_Return_In_HandleCameraMovementOnCannon = 0x67a4f9;
+//const uintptr_t ReadValuesFromMouse_Return_In_ReadMouseValuesForPilotingShip_Ship_Movement = 0x67929b;
+const uintptr_t ReadValuesFromMouse_Return_In_ReadMouseValuesForPilotingShip_Reticle_Movement = 0x679318;
+const uintptr_t ReadValuesFromMouse_Return_In_HandleCameraMovementInSK1P = 0x64fd91;
+const uintptr_t ReadValuesFromMouse_Return_In_ReadKeyboardAndMouseValues = 0x579614;
 
 typedef unsigned int (__thiscall * ClampValuesToAnalogStick)(int * param_1_00, float param_1, float * param_2, float * param_3);
 ClampValuesToAnalogStick ClampValuesToAnalogStick_Original = nullptr;
@@ -52,6 +60,7 @@ const uintptr_t ClampValuesToAnalogStick_Return_In_ReadMouseValuesForZeroG = (GA
 const uintptr_t ClampValuesToAnalogStick_Return_In_HandleCameraMovementOnLadder = (GAME_BASE_ADDRESS + 0x34e6a5);
 const uintptr_t ClampValuesToAnalogStick_Return_In_HandleCameraMovementOnCannon = 0x67a4ba;
 const uintptr_t ClampValuesToAnalogStick_Return_In_ReadMouseValuesForPilotingShip = 0x67932c;
+const uintptr_t ClampValuesToAnalogStick_Return_In_HandleCameraMovementForTimSliding = 0x590725;
 
 typedef float (__thiscall * ObtainValueForOnGroundNotAiming1)(int param_1_00, char param_1);
 ObtainValueForOnGroundNotAiming1 ObtainValueForOnGroundNotAiming1_Original = nullptr;
@@ -129,11 +138,6 @@ const FUN_00aa22d0 FUN_00aa22d0_Address = (FUN_00aa22d0)(GAME_BASE_ADDRESS + 0x6
 typedef void (__thiscall * HandleCameraMovementOnLadder)(void *, float);
 HandleCameraMovementOnLadder HandleCameraMovementOnLadder_Original = nullptr;
 const HandleCameraMovementOnLadder HandleCameraMovementOnLadder_Address = (HandleCameraMovementOnLadder)(GAME_BASE_ADDRESS + 0x34e480);
-const uintptr_t ReadValuesFromMouse_Return_In_HandleCameraMovementOnLadder = (GAME_BASE_ADDRESS + 0x34e68b);
-const uintptr_t ReadValuesFromMouse_Return_In_HandleCameraMovementOnCannon = 0x67a4f9;
-//const uintptr_t ReadValuesFromMouse_Return_In_ReadMouseValuesForPilotingShip_Ship_Movement = 0x67929b;
-const uintptr_t ReadValuesFromMouse_Return_In_ReadMouseValuesForPilotingShip_Reticle_Movement = 0x679318;
-const uintptr_t ReadValuesFromMouse_Return_In_HandleCameraMovementInSK1P = 0x64fd91;
 
 typedef double (__cdecl * ClamperFunction)(float value, float min, float max);
 ClamperFunction ClamperFunction_Original = nullptr;
@@ -152,6 +156,23 @@ const ReadMouseValuesForHandleCameraMovementOnCannon ReadMouseValuesForHandleCam
 typedef void (__thiscall * HandleCameraMovementOnCannon)(void * _this, float frameDelta);
 HandleCameraMovementOnCannon HandleCameraMovementOnCannon_Original = nullptr;
 const HandleCameraMovementOnCannon HandleCameraMovementOnCannon_Address = (HandleCameraMovementOnCannon)0x6a57b0;
+
+typedef void (__fastcall * HandleCameraMovementForTimSliding)(int _this);
+HandleCameraMovementForTimSliding HandleCameraMovementForTimSliding_Original = nullptr;
+const HandleCameraMovementForTimSliding HandleCameraMovementForTimSliding_Address = (HandleCameraMovementForTimSliding)(GAME_BASE_ADDRESS + 0x1906a0);
+
+//Handles camera movement during the section when Tim is sliding on snow
+//at the beginning of the game.
+void __fastcall HandleCameraMovementForTimSliding_Wrapper(int _this)
+{
+   int iVar6 = *(int *)(_this + 0x14);
+   int iVar8 = (int)*DAT_011d3b88;
+
+   *(float *)(*(int *)(iVar8 + 0xc) + 0x5d8) = 1.f;
+   *(float *)(iVar6 + 0x48) = DEGREES_TO_RADIANS / (*_DAT_012a9aa8);
+
+   HandleCameraMovementForTimSliding_Original(_this);
+}
 
 //typedef void (__thiscall * ReadMouseValuesForPilotingShip)(void * _this, int param_1, float param_2, unsigned int param_3, int * param_4, int param_5);
 //ReadMouseValuesForPilotingShip ReadMouseValuesForPilotingShip_Original = nullptr;
@@ -295,7 +316,8 @@ struct Hooks
       if(
          ret == ReadValuesFromMouse_Return_In_HandleCameraMovementOnGroundNotAiming ||
          ret == ReadValuesFromMouse_Return_In_ReadMouseValuesOnGroundAiming ||
-         ret == ReadValuesFromMouse_Return_In_HandleCameraMovementOnLadder)
+         ret == ReadValuesFromMouse_Return_In_HandleCameraMovementOnLadder ||
+         ret == ReadValuesFromMouse_Return_In_ReadKeyboardAndMouseValues)
       {
          ReadValuesFromMouse_Original(_this, param_1, param_2, x, y, 0, 0, param_7, param_8, param_9);
 
@@ -363,7 +385,8 @@ struct Hooks
          ret == ClampValuesToAnalogStick_Return_In_ReadMouseValuesForZeroG ||
          ret == ClampValuesToAnalogStick_Return_In_HandleCameraMovementOnLadder ||
          ret == ClampValuesToAnalogStick_Return_In_HandleCameraMovementOnCannon ||
-         ret == ClampValuesToAnalogStick_Return_In_ReadMouseValuesForPilotingShip)
+         ret == ClampValuesToAnalogStick_Return_In_ReadMouseValuesForPilotingShip ||
+         ret == ClampValuesToAnalogStick_Return_In_HandleCameraMovementForTimSliding)
       {
          return 0;
       }
@@ -865,6 +888,9 @@ void InitializeHooks()
    //Hooks for the cannon in chapter 6
    CreateHookAndEnable(ReadMouseValuesForHandleCameraMovementOnCannon_Address, Hooks::ReadMouseValuesForHandleCameraMovementOnCannon_Wrapper, (void**)&ReadMouseValuesForHandleCameraMovementOnCannon_Original, "ReadMouseValuesForHandleCameraMovementOnCannon");
    CreateHookAndEnable(HandleCameraMovementOnCannon_Address, Hooks::HandleCameraMovementOnCannon_Wrapper, (void**)&HandleCameraMovementOnCannon_Original, "HandleCameraMovementOnCannon");
+
+   //Hooks for Tim sliding on snow
+   CreateHookAndEnable(HandleCameraMovementForTimSliding_Address, HandleCameraMovementForTimSliding_Wrapper, (void**)&HandleCameraMovementForTimSliding_Original, "HandleCameraMovementForTimSliding");
 }
 
 void FreeHooks()
