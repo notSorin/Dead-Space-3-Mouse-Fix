@@ -1,6 +1,6 @@
+#include "dinput.h"
 #include "config.h"
 #include "hooks.h"
-#include "dinput.h"
 
 void InitializeDebugConsole()
 {

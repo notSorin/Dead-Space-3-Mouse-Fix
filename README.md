@@ -28,5 +28,4 @@ The "dinput8.dll" can be found under Releases, and the latest one is recommended
 To remove the patch, simply move, rename, or delete the "dinput8.dll".
 
 # For Developers
-This is a Visual Studio DLL project; it should be possible to simply open and build it.
-It may require to initialize the minhook submodule first, using "git submodule update --init".
+This is a Visual Studio DLL project; it should be possible to simply open the solution file and build it.
