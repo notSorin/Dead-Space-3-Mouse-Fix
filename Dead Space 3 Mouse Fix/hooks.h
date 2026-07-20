@@ -515,19 +515,16 @@ struct Hooks
    //This function handles camera movement when climbing ladders.
    static void __thiscall HandleCameraMovementOnLadder_Wrapper(void * _this, float frameDelta)
    {
-      //This local_30 is used to alter the values read from the mouse,
-      //so use it to invert its effect.
-      float local_30 = frameDelta <= 0.f ? 1.f : frameDelta * 30.f;
-
       //0x16c seems to always be 0.061087 (which may represent 3.5 degrees in radians)
       //0x170 seems to always be 0.061087
-      //Regardless of what they represent, they can be used to undo the impact that
-      //the frameDelta has on the new angles calculated in here, and at the same time
+      //Regardless of what they represent, they can be used to
       //convert the values read from the mouse to radians.
-      *(float *)((int)_this + 0x16c) = DEGREES_TO_RADIANS / local_30;
-      *(float *)((int)_this + 0x170) = DEGREES_TO_RADIANS / local_30;
+      *(float *)((int)_this + 0x16c) = DEGREES_TO_RADIANS;
+      *(float *)((int)_this + 0x170) = DEGREES_TO_RADIANS;
 
-      HandleCameraMovementOnLadder_Original(_this, frameDelta);
+      //Pass 1/30 as frameDelta so an internal variable becomes 1, and avoid unnecessary
+      //modifications to the final view angles.
+      HandleCameraMovementOnLadder_Original(_this, 1.f / 30.f);
    }
 
    //This function handles the camera movement while inside the SK1P shuttle,

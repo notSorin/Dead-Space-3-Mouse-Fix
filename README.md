@@ -1,7 +1,7 @@
 # What the Patch Does
 The patch applies raw mouse input in the following cases:
 
-✅While on the ground, when aiming / not aiming (Also, camera auto centering has been disabled.)
+✅On the ground, when aiming / not aiming (also, camera auto centering has been disabled)
 
 ✅In zero gravity, when aiming / not aiming
 
@@ -13,7 +13,7 @@ The patch applies raw mouse input in the following cases:
 
 ✅In certain situations such as when sitting inside the SK1P fast travel shuttle, or when repairing the ship that is piloted in chapter 7
 
-✅When climbing ladders (This one does not feel entirely raw. I may tweak it further.)
+✅When climbing ladders
 
 The cases mentioned above were all that I could find that can use raw mouse input, but there may be some which I have not yet discovered. The patch will be updated if more relevant cases are found.
 
